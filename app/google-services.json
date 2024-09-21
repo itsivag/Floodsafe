@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "832741889263",
+    "project_id": "floodsafe-3501b",
+    "storage_bucket": "floodsafe-3501b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:832741889263:android:2e5c95c316584fce1db71a",
+        "android_client_info": {
+          "package_name": "com.code_crusaders.floodsafe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWZE1u_ji7Z-lGOoEmAbCV-rHQZstBeQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
