@@ -1,0 +1,13 @@
+Index: app/src/main/java/com/code_crusaders/floodsafe/Sample.kt
+===================================================================
+diff --git a/app/src/main/java/com/code_crusaders/floodsafe/Sample.kt b/app/src/main/java/com/code_crusaders/floodsafe/Sample.kt
+deleted file mode 100644
+--- a/app/src/main/java/com/code_crusaders/floodsafe/Sample.kt	
++++ /dev/null	
+@@ -1,5 +0,0 @@
+-package com.code_crusaders.floodsafe
+-
+-class Sample() {
+-
+-}
+\ No newline at end of file
