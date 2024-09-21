@@ -12,10 +12,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FmdBad
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -186,11 +194,32 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         Icon(
-                            imageVector = Icons.Default.LocationOn,
+                            imageVector = Icons.Default.MyLocation,
                             contentDescription = "Current Location"
                         )
                     }
-                }) { innerPadding ->
+                },
+                    bottomBar = {
+                        BottomAppBar(
+                            actions = {
+                                IconButton(onClick = {
+
+                                }) {
+                                    Icon(
+                                        Icons.Filled.FmdBad,
+                                        contentDescription = "Localized description"
+                                    )
+                                }
+                                IconButton(onClick = { /* do something */ }) {
+                                    Icon(
+                                        Icons.Filled.Call,
+                                        contentDescription = "Localized description",
+                                    )
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
                     Column(
                         Modifier
                             .padding(innerPadding)
@@ -232,50 +261,22 @@ class MainActivity : ComponentActivity() {
                                 )
                                 circleRadius = 40.0
                                 circleColor =
-                                    Color(red = 3, green = 169, blue = 244, alpha = 255).copy(alpha = 0.4f)
+                                    Color(
+                                        red = 3,
+                                        green = 169,
+                                        blue = 244,
+                                        alpha = 255
+                                    ).copy(alpha = 0.4f)
 
                             }
-
-                            PointAnnotationGroup(
-                                annotations = points.map {
-                                    PointAnnotationOptions()
-                                        .withPoint(it)
-                                        .withIconImage(ICON_FIRE_STATION)
-                                },
-                                annotationConfig = AnnotationConfig(
-                                    annotationSourceOptions = AnnotationSourceOptions(
-                                        clusterOptions = ClusterOptions(
-                                            textColorExpression = Expression.color(Color.Yellow),
-                                            textColor = Color.BLACK,
-                                            textSize = 20.0,
-                                            circleRadiusExpression = literal(25.0),
-                                            colorLevels = listOf(
-                                                Pair(100, Color.RED),
-                                                Pair(50, Color.BLUE),
-                                                Pair(0, Color.GREEN)
-                                            )
-                                        )
-                                    )
-                                ),
-                                onClick = {
-                                    Toast.makeText(
-                                        this@PointAnnotationClusterActivity,
-                                        "Clicked on Point Annotation Cluster: $it",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    true
-                                }
-                            )
                         }
                     }
-                        }
-                    }
+                }
+            }
 //                        LocationDisplay(userLocation)
 //                        Button(onClick = { checkLocationPermission() }) {
 //                            Text("Update Location")
 //                        }
-                }
-            }
         }
     }
 
@@ -287,14 +288,5 @@ class MainActivity : ComponentActivity() {
 
     private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-}
-
-@Composable
-fun LocationDisplay(location: Location?) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Current Location:")
-        Text(text = "Latitude: ${location?.latitude ?: "Unknown"}")
-        Text(text = "Longitude: ${location?.longitude ?: "Unknown"}")
     }
 }

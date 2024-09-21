@@ -67,6 +67,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //icons extended
+    implementation(libs.androidx.material.icons.extended)
+
     implementation("com.mapbox.maps:android:11.6.1")
     implementation("com.mapbox.extension:maps-compose:11.6.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
