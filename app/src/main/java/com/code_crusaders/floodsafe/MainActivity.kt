@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,10 +51,10 @@ class MainActivity : ComponentActivity() {
 
     private fun populateData() {
         //createSyntheticData(db)
-        retrieveData(db)
+        retrieveData()
     }
 
-    fun retrieveData(db: FirebaseFirestore) {
+    fun retrieveData() {
         // Retrieve flooded areas
         db.collection("cities")
             .document("chennai")
@@ -63,7 +64,7 @@ class MainActivity : ComponentActivity() {
                 for (document in result) {
                     val floodedArea = document.toObject(FloodedArea::class.java)
                     // Process flooded area data
-                    println("Flooded Area: ${floodedArea.location}, Depth: ${floodedArea.depth}, Radius: ${floodedArea.radius}")
+                    Log.d("Firestore","Flooded Area: ${floodedArea.location}, Depth: ${floodedArea.depth}, Radius: ${floodedArea.radius}")
                 }
             }
             .addOnFailureListener { exception ->
@@ -79,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 for (document in result) {
                     val disasterManagementService = document.toObject(DisasterManagementService::class.java)
                     // Process disaster management service data
-                    println("Disaster Management Service: ${disasterManagementService.location}, Type: ${disasterManagementService.type}, Contact Info: ${disasterManagementService.contactInfo}")
+                    Log.d("Firestore","Disaster Management Service: ${disasterManagementService.location}, Type: ${disasterManagementService.type}, Contact Info: ${disasterManagementService.contactInfo}")
                 }
             }
             .addOnFailureListener { exception ->
@@ -95,7 +96,7 @@ class MainActivity : ComponentActivity() {
                 for (document in result) {
                     val emergencySupplyDrop = document.toObject(EmergencySupplyDrop::class.java)
                     // Process emergency supply drop data
-                    println("Emergency Supply Drop: ${emergencySupplyDrop.location}, Status: ${emergencySupplyDrop.status}, Notification: ${emergencySupplyDrop.notification}")
+                    Log.d("Firestore","Emergency Supply Drop: ${emergencySupplyDrop.location}, Status: ${emergencySupplyDrop.status}, Notification: ${emergencySupplyDrop.notification}")
                 }
             }
             .addOnFailureListener { exception ->
@@ -171,7 +172,7 @@ class MainActivity : ComponentActivity() {
                 Log.e("Firestore", "Failed to create synthetic data", exception)
             }
     }
-}
+
 
 
 @Composable
@@ -180,6 +181,11 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         text = "Hello $name!",
         modifier = modifier
     )
+    Button(onClick = {
+        retrieveData()
+    }) {
+        Text("Retrieve Data")
+    }
 }
 
 @Preview(showBackground = true)
@@ -188,4 +194,6 @@ fun GreetingPreview() {
     FloodsafeTheme {
         Greeting("Android")
     }
+}
+
 }
