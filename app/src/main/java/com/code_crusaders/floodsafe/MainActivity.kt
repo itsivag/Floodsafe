@@ -97,12 +97,30 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
         enableEdgeToEdge()
         setContent {
         }
 
+
+
         checkLocationPermission()
+    }
+
+    private fun sampleDataPrint() {
+
+        val localDataStore = DataHandler().getLocalSyntheticData()
+
+        // Access data from the LocalDataStore object
+        val floodedAreas = localDataStore.floodedAreas
+        val disasterManagementServices = localDataStore.disasterManagementServices
+        val emergencySupplyDrops = localDataStore.emergencySupplyDrops
+
+        floodedAreas.forEach { floodedArea ->
+            Log.d(
+                "MainActivity",
+                "Flooded Area: ${floodedArea.location}, Depth: ${floodedArea.depth}, Radius: ${floodedArea.radius}"
+            )
+        }
     }
 
     private fun checkLocationPermission() {
