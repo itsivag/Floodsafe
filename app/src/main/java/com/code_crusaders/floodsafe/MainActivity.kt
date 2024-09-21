@@ -1,6 +1,7 @@
 package com.code_crusaders.floodsafe
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -23,14 +24,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.code_crusaders.floodsafe.ui.theme.FloodsafeTheme
 import com.google.android.gms.location.*
 import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
+import com.mapbox.maps.Style
+import com.mapbox.maps.dsl.cameraOptions
+import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.generated.CircleAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGroup
+import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
+import com.mapbox.maps.plugin.annotation.AnnotationConfig
+import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
+import com.mapbox.maps.plugin.annotation.ClusterOptions
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -74,47 +89,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+
         enableEdgeToEdge()
         setContent {
-//            FloodsafeTheme {
-//                var userLocation by remember { mutableStateOf<Location?>(null) }
-//
-//                Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
-//                    FloatingActionButton(
-//                        onClick = { /*TODO*/ }) {
-//                        IconButton(onClick = { /*TODO*/ }) {
-//                            Icon(
-//                                imageVector = Icons.Default.LocationOn,
-//                                contentDescription = "Current Location"
-//                            )
-//                        }
-//                    }
-//                }) { innerPadding ->
-//                    Column(
-//                        Modifier
-//                            .padding(innerPadding)
-//                            .fillMaxSize()
-//                    ) {
-//                        MapboxMap(
-//                            Modifier
-//                                .weight(1f)
-//                                .fillMaxSize(),
-//                            mapViewportState = rememberMapViewportState {
-//                                setCameraOptions {
-//                                    zoom(2.0)
-//                                    center(Point.fromLngLat(-98.0, 39.5))
-//                                    pitch(0.0)
-//                                    bearing(0.0)
-//                                }
-//                            },
-//                        )
-////                        LocationDisplay(userLocation)
-////                        Button(onClick = { checkLocationPermission() }) {
-////                            Text("Update Location")
-////                        }
-//                    }
-//                }
-//            }
         }
 
         checkLocationPermission()
@@ -140,6 +117,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun getLastLocationOrStartLocationUpdates() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
@@ -179,11 +157,34 @@ class MainActivity : ComponentActivity() {
     private fun updateLocationUI(location: Location) {
         setContent {
             FloodsafeTheme {
-                var userLocation by remember { mutableStateOf(location) }
+                val mapViewportState = rememberMapViewportState {
+                    // Set the initial camera position
+                    setCameraOptions {
+                        center(Point.fromLngLat(0.0, 0.0))
+                        zoom(0.0)
+                        pitch(0.0)
+                    }
+                }
+                val userLocation by remember { mutableStateOf(location) }
+                val context = LocalContext.current
 
                 Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
                     FloatingActionButton(
-                        onClick = { /*TODO*/ }) {
+                        onClick = {
+                            mapViewportState.flyTo(
+                                cameraOptions = cameraOptions {
+                                    center(
+                                        Point.fromLngLat(
+                                            userLocation.longitude,
+                                            userLocation.latitude
+                                        )
+                                    )
+                                    zoom(14.0)
+                                    pitch(45.0)
+                                },
+                                MapAnimationOptions.mapAnimationOptions { duration(5000) }
+                            )
+                        }) {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Current Location"
@@ -199,24 +200,85 @@ class MainActivity : ComponentActivity() {
                             Modifier
                                 .weight(1f)
                                 .fillMaxSize(),
-                            mapViewportState = rememberMapViewportState {
-                                setCameraOptions {
-                                    zoom(10.0)
-                                    center(Point.fromLngLat(location.longitude, location.latitude))
-                                    pitch(0.0)
-                                    bearing(0.0)
+                            mapViewportState = mapViewportState,
+                            style = {
+                                MapStyle(style = Style.SATELLITE_STREETS)
+                            }
+                        ) {
+//                            MapEffect(key1 = true) { mapView ->
+//
+//                            }
+                            // Add a single circle annotation at null island.
+                            CircleAnnotation(
+                                point = Point.fromLngLat(
+                                    userLocation.longitude,
+                                    userLocation.latitude
+                                ),
+                                onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        "Clicked on Circle Annotation: $it",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    true
                                 }
-                            },
-                        )
-                        LocationDisplay(userLocation)
+                            ) {
+                                circleStrokeWidth = 2.0
+                                circleStrokeColor = Color(
+                                    red = 3,
+                                    green = 169,
+                                    blue = 244,
+                                    alpha = 255
+                                )
+                                circleRadius = 40.0
+                                circleColor =
+                                    Color(red = 3, green = 169, blue = 244, alpha = 255).copy(alpha = 0.4f)
+
+                            }
+
+                            PointAnnotationGroup(
+                                annotations = points.map {
+                                    PointAnnotationOptions()
+                                        .withPoint(it)
+                                        .withIconImage(ICON_FIRE_STATION)
+                                },
+                                annotationConfig = AnnotationConfig(
+                                    annotationSourceOptions = AnnotationSourceOptions(
+                                        clusterOptions = ClusterOptions(
+                                            textColorExpression = Expression.color(Color.Yellow),
+                                            textColor = Color.BLACK,
+                                            textSize = 20.0,
+                                            circleRadiusExpression = literal(25.0),
+                                            colorLevels = listOf(
+                                                Pair(100, Color.RED),
+                                                Pair(50, Color.BLUE),
+                                                Pair(0, Color.GREEN)
+                                            )
+                                        )
+                                    )
+                                ),
+                                onClick = {
+                                    Toast.makeText(
+                                        this@PointAnnotationClusterActivity,
+                                        "Clicked on Point Annotation Cluster: $it",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    true
+                                }
+                            )
+                        }
+                    }
+                        }
+                    }
+//                        LocationDisplay(userLocation)
 //                        Button(onClick = { checkLocationPermission() }) {
 //                            Text("Update Location")
 //                        }
-                    }
                 }
             }
         }
     }
+
 
     override fun onPause() {
         super.onPause()
