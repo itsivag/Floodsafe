@@ -6,35 +6,27 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FmdBad
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.code_crusaders.floodsafe.ui.theme.FloodsafeTheme
 import com.google.android.gms.location.*
@@ -42,18 +34,14 @@ import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.dsl.cameraOptions
-import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.CircleAnnotation
-import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGroup
 import com.mapbox.maps.extension.compose.style.MapStyle
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.annotation.AnnotationConfig
-import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
-import com.mapbox.maps.plugin.annotation.ClusterOptions
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import  com.code_crusaders.floodsafe.data.DataHandler
+import com.code_crusaders.floodsafe.models.FloodedArea
+import com.code_crusaders.floodsafe.presentation.WaterLoggingAnnotation
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -81,6 +69,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val localDataStore = DataHandler().getLocalSyntheticData()
+
+    // Access data from the LocalDataStore object
+    private val floodedAreas = localDataStore.floodedAreas
+    val disasterManagementServices = localDataStore.disasterManagementServices
+    val emergencySupplyDrops = localDataStore.emergencySupplyDrops
+
+    init {
+        fetchFloodData()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,25 +95,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        enableEdgeToEdge()
-        setContent {
-        }
-
-
-
         checkLocationPermission()
+
+//        sampleDataPrint()
     }
 
-    private fun sampleDataPrint() {
-
-        val localDataStore = DataHandler().getLocalSyntheticData()
-
-        // Access data from the LocalDataStore object
-        val floodedAreas = localDataStore.floodedAreas
-        val disasterManagementServices = localDataStore.disasterManagementServices
-        val emergencySupplyDrops = localDataStore.emergencySupplyDrops
-
+    private fun fetchFloodData() {
         floodedAreas.forEach { floodedArea ->
             Log.d(
                 "MainActivity",
@@ -256,48 +242,16 @@ class MainActivity : ComponentActivity() {
 //
 //                            }
                             // Add a single circle annotation at null island.
-                            CircleAnnotation(
-                                point = Point.fromLngLat(
-                                    userLocation.longitude,
-                                    userLocation.latitude
-                                ),
-                                onClick = {
-                                    Toast.makeText(
-                                        context,
-                                        "Clicked on Circle Annotation: $it",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    true
-                                }
-                            ) {
-                                circleStrokeWidth = 2.0
-                                circleStrokeColor = Color(
-                                    red = 3,
-                                    green = 169,
-                                    blue = 244,
-                                    alpha = 255
-                                )
-                                circleRadius = 40.0
-                                circleColor =
-                                    Color(
-                                        red = 3,
-                                        green = 169,
-                                        blue = 244,
-                                        alpha = 255
-                                    ).copy(alpha = 0.4f)
 
+                            for (i in floodedAreas) {
+                                WaterLoggingAnnotation(i)
                             }
                         }
                     }
                 }
             }
-//                        LocationDisplay(userLocation)
-//                        Button(onClick = { checkLocationPermission() }) {
-//                            Text("Update Location")
-//                        }
         }
     }
-
 
     override fun onPause() {
         super.onPause()
