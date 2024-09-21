@@ -66,4 +66,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("com.mapbox.maps:android:11.6.1")
+    implementation("com.mapbox.extension:maps-compose:11.6.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
