@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,10 +24,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.code_crusaders.floodsafe.ui.theme.FloodsafeTheme
 import com.google.android.gms.location.*
@@ -36,11 +36,10 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.annotation.generated.CircleAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import  com.code_crusaders.floodsafe.data.DataHandler
-import com.code_crusaders.floodsafe.models.FloodedArea
+import com.code_crusaders.floodsafe.presentation.DisasterManagementAnnotation
 import com.code_crusaders.floodsafe.presentation.WaterLoggingAnnotation
 
 class MainActivity : ComponentActivity() {
@@ -178,8 +177,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 val userLocation by remember { mutableStateOf(location) }
-                val context = LocalContext.current
 
+                var isBottomSheetVisible by remember {
+                    mutableStateOf(false)
+                }
                 Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
                     FloatingActionButton(
                         onClick = {
@@ -244,7 +245,19 @@ class MainActivity : ComponentActivity() {
                             // Add a single circle annotation at null island.
 
                             for (i in floodedAreas) {
-                                WaterLoggingAnnotation(i)
+                                WaterLoggingAnnotation(i) {
+                                    isBottomSheetVisible = !isBottomSheetVisible
+                                }
+                            }
+
+                            for (i in disasterManagementServices) {
+                                DisasterManagementAnnotation(i) {
+                                    isBottomSheetVisible = !isBottomSheetVisible
+                                }
+                            }
+
+                            AnimatedVisibility(visible = isBottomSheetVisible) {
+                                Text(text = "Bottom Sheet")
                             }
                         }
                     }
