@@ -2,8 +2,10 @@ package com.code_crusaders.floodsafe
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -42,6 +44,9 @@ import  com.code_crusaders.floodsafe.data.DataHandler
 import com.code_crusaders.floodsafe.presentation.DisasterManagementAnnotation
 import com.code_crusaders.floodsafe.presentation.WaterLoggingAnnotation
 
+//enter your password in settings.gradle.kts
+const val MAP_BOX_KEY = "enter_your_key_here"
+
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -72,7 +77,7 @@ class MainActivity : ComponentActivity() {
 
     // Access data from the LocalDataStore object
     private val floodedAreas = localDataStore.floodedAreas
-    val disasterManagementServices = localDataStore.disasterManagementServices
+    private val disasterManagementServices = localDataStore.disasterManagementServices
     val emergencySupplyDrops = localDataStore.emergencySupplyDrops
 
     init {
@@ -83,7 +88,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         MapboxOptions.accessToken =
-            "pk.eyJ1IjoiaXRzaXZhZyIsImEiOiJjbGd5eWIyODIwZWI5M3Bwbm1rZjN0azM1In0.kCxW9Q7SksXt_BwV5QT5MQ"
+            MAP_BOX_KEY
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -208,14 +213,15 @@ class MainActivity : ComponentActivity() {
                         BottomAppBar(
                             actions = {
                                 IconButton(onClick = {
-
                                 }) {
                                     Icon(
                                         Icons.Filled.FmdBad,
                                         contentDescription = "Localized description"
                                     )
                                 }
-                                IconButton(onClick = { /* do something */ }) {
+                                IconButton(onClick = {
+                                    makeSOSCall()
+                                }) {
                                     Icon(
                                         Icons.Filled.Call,
                                         contentDescription = "Localized description",
@@ -274,4 +280,15 @@ class MainActivity : ComponentActivity() {
     private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
+
+
+    private fun makeSOSCall() {
+        val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+            val emergencyNumber = 100
+            data = Uri.parse("tel:$emergencyNumber")
+        }
+        startActivity(dialIntent)
+    }
+
+
 }

@@ -1,5 +1,7 @@
 package com.code_crusaders.floodsafe.presentation
 
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -21,7 +23,8 @@ fun WaterLoggingAnnotation(
             floodedArea.location.latitude
         ),
         onClick = {
-            changeBottomSheetState()
+            Toast.makeText(context, "Flood Level : " + floodedArea.depth + " cm", LENGTH_SHORT)
+                .show()
             true
         }
     ) {
